@@ -28,14 +28,25 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
     private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
     private String instr; // String que contiene las instrucciones del juego.
+    private SoundClip shell;
+    private SoundClip catched;
     
     public JFrameTiroParabolico() {
         //Se inicializan variables
         pausado = false;
         instrucciones = false;
-        // TODO
-        instr = "El juego consiste en..."; // Instrucciones del jugo
-        // END TODO
+        // TODO Corregir
+        instr = "El juego consiste en intentar atrapar la pelota con la canasta. Al momento de darle clic a la pelota, esta se moverá a través de la pantalla. Con las teclas izquierda y derecha, podrás mover la canasta. Si no llegas atrapar la pelota, la pelota caerá más rápido... ¡CUIDADO! ¡TU PUEDES!"; // Instrucciones del jugo
+        // END TODO Corregir
+        // Se cargan los sonidos
+        shell = new SoundClip("sounds/stomp.wav");
+        catched = new SoundClip("siunds/marioSound.wav");
+        
+        
+        // Declaras un hilo
+        Thread th = new Thread(this);
+        // Empieza el hilo
+        th.start();        
     }
 
     public void run() {
