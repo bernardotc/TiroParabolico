@@ -24,13 +24,27 @@ import java.util.LinkedList;
 public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
     private Image dbImage;    // Imagen a proyectar
-    private Graphics dbg;
+    private Graphics dbg;   // Objeto grafico
+    private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
+    private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
+    private String instr; // String que contiene las instrucciones del juego.
+    
+    public JFrameTiroParabolico() {
+        //Se inicializan variables
+        pausado = false;
+        instrucciones = false;
+        // TODO
+        instr = "El juego consiste en..."; // Instrucciones del jugo
+        // END TODO
+    }
 
     public void run() {
 
         while (true) {
-            actualiza();
-            checaColision();
+            if (!pausado) {
+                actualiza();
+                checaColision();
+            }
 
             // Se actualiza el <code>Applet</code> repintando el contenido.
             repaint();
@@ -178,7 +192,20 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> generado al presionar las teclas.
      */
     public void keyPressed(KeyEvent e) {
-
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            if (pausado) {
+                pausado = false;
+            } else {
+                pausado = true;
+            }
+        }
+        else if (e.getKeyCode() == KeyEvent.VK_I) {
+            if (instrucciones) {
+                instrucciones = false;
+            } else {
+                instrucciones = true;
+            }
+        }
     }
 
     /**
@@ -208,7 +235,11 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
 
     public void paint1(Graphics g) {
         if (dbImage != null) {
-
+            if (instrucciones) {
+                g.drawString(instr, 20, 20);
+            } else {
+                
+            }
         } else {
             //Da un mensaje mientras se carga el dibujo	
             g.drawString("No se cargo la imagen..", 20, 20);
