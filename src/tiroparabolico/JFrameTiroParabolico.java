@@ -16,6 +16,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.net.URL;
 import java.util.LinkedList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException; 
+import java.util.Vector;
 
 /**
  *
@@ -27,9 +35,14 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     private Graphics dbg;   // Objeto grafico
     private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
     private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
+    private boolean cargar;
+    private boolean guardar;
     private String instr; // String que contiene las instrucciones del juego.
     private SoundClip shell;
     private SoundClip catched;
+    private String nombreArchivo;   // Nombre del archivo
+    private Vector vec;     // Objeto vector
+    private String[] arr;   // Arreglo del archivo dividido
     
     public JFrameTiroParabolico() {
         //Se inicializan variables
@@ -216,6 +229,10 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
             } else {
                 instrucciones = true;
             }
+        } else if (e.getKeyCode() == KeyEvent.VK_C) {
+            cargar = true;
+        } else if (e.getKeyCode() == KeyEvent.VK_G) {
+            guardar = true;
         }
     }
 
@@ -242,6 +259,49 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      */
     public void keyReleased(KeyEvent e) {
 
+    }
+    
+    /**
+     * Metodo que lee a informacion de un archivo y lo agrega a un vector.
+     *
+     * @throws IOException
+     */
+    public void leeArchivo() throws IOException{
+    	BufferedReader fileIn;
+    	try{
+    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
+    	} catch (FileNotFoundException e){
+    		File puntos = new File(nombreArchivo);
+    		PrintWriter fileOut = new PrintWriter(puntos);
+    		fileOut.println("100,demo");
+    		fileOut.close();
+    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
+    	}
+    	String dato = fileIn.readLine();
+
+    	while(dato != null) {
+    		arr = dato.split(",");
+    		int num = (Integer.parseInt(arr[0]));
+    		String nom = arr[1];
+    		//vec.add(new Puntaje(nom, num));
+    		dato = fileIn.readLine();
+    	}
+    	fileIn.close();
+    }
+
+    /**
+     * Metodo que agrega la informacion del vector al archivo.
+     *
+     * @throws IOException
+     */
+    public void grabaArchivo() throws IOException{
+    	PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
+    	for (int i=0; i<vec.size(); i++) {
+    		//Puntaje x;
+    		//x = (Puntaje) vec.get(i);
+    		//fileOut.println(x.toString());
+    	}
+    	fileOut.close();	
     }
 
     public void paint1(Graphics g) {
