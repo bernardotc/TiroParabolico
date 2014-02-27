@@ -13,7 +13,7 @@ import java.awt.Rectangle;
 public class Base {
 	
         //velocidades
-        private int velX;
+        protected int velX;
         protected int velY;
     
 	private int posX;    //posicion en x.       
@@ -29,6 +29,8 @@ public class Base {
 	public Base(int posX, int posY) {
 		this.posX=posX;
 		this.posY=posY;
+                this.velX=0;
+                this.velY=0;
 	}
 	
 	/**

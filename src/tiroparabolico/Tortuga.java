@@ -26,4 +26,13 @@ public class Tortuga extends Base{
             ImageIcon image = new ImageIcon(imagen);
             this.setImageIcon(image);
         }
+        
+        public void gravedad(){
+            if (this.velX < 0){
+                this.velX += 1;
+            }
+            else if (this.velX > 0){
+                this.velX -= 1;
+            }
+        }
 }
