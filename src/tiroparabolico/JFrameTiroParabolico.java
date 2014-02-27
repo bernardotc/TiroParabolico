@@ -14,6 +14,16 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.net.URL;
+import java.util.LinkedList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException; 
+import java.util.Vector;
 
 /**
  *
@@ -36,11 +46,18 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         //de movimiento de la tortuga
     private boolean derecha;
     private boolean izquierda;
+
+    private boolean cargar;
+    private boolean guardar;
+    private String instr; // String que contiene las instrucciones del juego.
+    private SoundClip shell;
+    private SoundClip catched;
+    private String nombreArchivo;   // Nombre del archivo
+    private Vector vec;     // Objeto vector
+    private String[] arr;   // Arreglo del archivo dividido
     
     private boolean colision;
     
-    private String instr; // String que contiene las instrucciones del juego.
-
     public JFrameTiroParabolico() {
         //Se inicializan variables
         pausado = false;
@@ -63,22 +80,19 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
 
         // TODO
         instr = "El juego consiste en..."; // Instrucciones del jugo
-        start();
         // END TODO
-    }
-    
-    /**
-     * Metodo <I>start</I> sobrescrito de la clase <code>Applet</code>.<P>
-     * En este metodo se crea e inicializa el hilo para la animacion este metodo
-     * es llamado despues del init o cuando el usuario visita otra pagina y
-     * luego regresa a la pagina en donde esta este <code>Applet</code>
-     *
-     */
-    public void start() {
+        // TODO Corregir
+        instr = "El juego consiste en intentar atrapar la pelota con la canasta. Al momento de darle clic a la pelota, esta se moverá a través de la pantalla. Con las teclas izquierda y derecha, podrás mover la canasta. Si no llegas atrapar la pelota, la pelota caerá más rápido... ¡CUIDADO! ¡TU PUEDES!"; // Instrucciones del jugo
+        // END TODO Corregir
+        // Se cargan los sonidos
+        shell = new SoundClip("sounds/stomp.wav");
+        catched = new SoundClip("siunds/marioSound.wav");
+        
+        
         // Declaras un hilo
         Thread th = new Thread(this);
         // Empieza el hilo
-        th.start();
+        th.start();        
     }
 
     public void run() {
@@ -313,6 +327,10 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
             if (!izquierda) {
                 izquierda = true;
             }
+        } else if (e.getKeyCode() == KeyEvent.VK_C) {
+            cargar = true;
+        } else if (e.getKeyCode() == KeyEvent.VK_G) {
+            guardar = true;
         }
     }
 
@@ -347,6 +365,49 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
                 derecha = false;
             }
         }
+    }
+    
+    /**
+     * Metodo que lee a informacion de un archivo y lo agrega a un vector.
+     *
+     * @throws IOException
+     */
+    public void leeArchivo() throws IOException{
+    	BufferedReader fileIn;
+    	try{
+    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
+    	} catch (FileNotFoundException e){
+    		File puntos = new File(nombreArchivo);
+    		PrintWriter fileOut = new PrintWriter(puntos);
+    		fileOut.println("100,demo");
+    		fileOut.close();
+    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
+    	}
+    	String dato = fileIn.readLine();
+
+    	while(dato != null) {
+    		arr = dato.split(",");
+    		int num = (Integer.parseInt(arr[0]));
+    		String nom = arr[1];
+    		//vec.add(new Puntaje(nom, num));
+    		dato = fileIn.readLine();
+    	}
+    	fileIn.close();
+    }
+
+    /**
+     * Metodo que agrega la informacion del vector al archivo.
+     *
+     * @throws IOException
+     */
+    public void grabaArchivo() throws IOException{
+    	PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
+    	for (int i=0; i<vec.size(); i++) {
+    		//Puntaje x;
+    		//x = (Puntaje) vec.get(i);
+    		//fileOut.println(x.toString());
+    	}
+    	fileOut.close();	
     }
 
     public void paint1(Graphics g) {
