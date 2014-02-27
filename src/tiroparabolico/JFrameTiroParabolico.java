@@ -14,8 +14,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.net.URL;
-import java.util.LinkedList;
 
 /**
  *
@@ -23,19 +21,59 @@ import java.util.LinkedList;
  */
 public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
+    private Caparazon caparazon; //objeto del caparazon
+    private Tortuga tortuga; //objeto de la tortuga
+
     private Image dbImage;    // Imagen a proyectar
     private Graphics dbg;   // Objeto grafico
     private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
     private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
+
+    // banderas
+        // de movimiento
+    private boolean click;
+    private boolean volando;
+
     private String instr; // String que contiene las instrucciones del juego.
-    
+
     public JFrameTiroParabolico() {
         //Se inicializan variables
         pausado = false;
         instrucciones = false;
+        
+        click = false;
+        volando = false;
+
+        setBackground(Color.white);
+        setSize(800, 500);
+
+        tortuga = new Tortuga(getWidth()/2, (getHeight() - tortuga.getAlto()));
+        caparazon = new Caparazon(5, getHeight() / 2);
+        caparazon.setVelX(0);
+        caparazon.setVelY(0);
+        
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        addKeyListener(this);
+
         // TODO
         instr = "El juego consiste en..."; // Instrucciones del jugo
+        start();
         // END TODO
+    }
+    
+    /**
+     * Metodo <I>start</I> sobrescrito de la clase <code>Applet</code>.<P>
+     * En este metodo se crea e inicializa el hilo para la animacion este metodo
+     * es llamado despues del init o cuando el usuario visita otra pagina y
+     * luego regresa a la pagina en donde esta este <code>Applet</code>
+     *
+     */
+    public void start() {
+        // Declaras un hilo
+        Thread th = new Thread(this);
+        // Empieza el hilo
+        th.start();
     }
 
     public void run() {
@@ -64,6 +102,28 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      */
     public void actualiza() {
         //Determina el tiempo que ha transcurrido desde que el Applet inicio su ejecución
+        if (!pausado) {
+            if (click && volando) {
+                int opcion = (int) ((Math.random() * 15)) + 1; //da la opcion sobre la distancia final en x
+                caparazon.setVelX(opcion);
+                caparazon.setVelY(-20);
+                click = false;
+            }
+            if (volando) {
+                caparazon.gravedad();
+                caparazon.setPosX(caparazon.getPosX() + caparazon.getVelX());
+                caparazon.setPosY(caparazon.getPosY() + caparazon.getVelY());
+            }
+            if (caparazon.getPosY() > getHeight()){
+                volando = false;
+                caparazon.setPosY(getHeight()/2);
+                caparazon.setPosX(0);
+                caparazon.setVelX(0);
+                caparazon.setVelY(0);
+            }
+            
+            
+        }
 
     }
 
@@ -110,7 +170,6 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> generado al presionar el ariados.
      */
     public void mouseClicked(MouseEvent e) {
-
     }
 
     /**
@@ -145,6 +204,10 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> generado al presionar el ariados.
      */
     public void mousePressed(MouseEvent e) {
+        if (caparazon.intersecta(e.getX(), e.getY()) && !click && !volando) {
+            click = true;
+            volando = true;
+        }
 
     }
 
@@ -198,12 +261,17 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
             } else {
                 pausado = true;
             }
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_I) {
+        } else if (e.getKeyCode() == KeyEvent.VK_I) {
             if (instrucciones) {
                 instrucciones = false;
             } else {
                 instrucciones = true;
+            }
+        } else if (e.getKeyCode() == KeyEvent.VK_A) {
+            if (!click) {
+                click = true;
+            } else {
+                click = false;
             }
         }
     }
@@ -234,11 +302,15 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     }
 
     public void paint1(Graphics g) {
-        if (dbImage != null) {
+        if (caparazon != null && tortuga != null) {
+            g.drawString("velocidad Y:" + caparazon.getVelY(), getWidth()/2, 5);
+            g.drawString("velocidad X:" + caparazon.getVelX(), getWidth()/2, 15);
+            g.drawImage(caparazon.getImagenI(), caparazon.getPosX(), caparazon.getPosY(), this);
+            g.drawImage(tortuga.getImagenI(), tortuga.getPosX(), tortuga.getPosY(), this);
             if (instrucciones) {
                 g.drawString(instr, 20, 20);
             } else {
-                
+
             }
         } else {
             //Da un mensaje mientras se carga el dibujo	

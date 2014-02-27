@@ -17,6 +17,9 @@ public class TiroParabolico {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        JFrameTiroParabolico juego1 = new JFrameTiroParabolico();
+        juego1.setVisible(true);
+        juego1.setDefaultCloseOperation(JFrameTiroParabolico.EXIT_ON_CLOSE);
     }
     
 }
