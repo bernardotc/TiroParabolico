@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package tiroparabolico;
 
 /**
- *
+ * @author mrquorr
  * @author bernardot
+ * Bernardo Treviño
+ * Sergio Cordero
+ * @version 1.00 25/02/2014
  */
 public class TiroParabolico {
 
@@ -21,5 +23,5 @@ public class TiroParabolico {
         juego1.setVisible(true);
         juego1.setDefaultCloseOperation(JFrameTiroParabolico.EXIT_ON_CLOSE);
     }
-    
+
 }

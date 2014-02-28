@@ -8,6 +8,7 @@ package tiroparabolico;
 /**
  *
  * @author bernardot
+ * @version 1.00 26/02/2014
  */
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.LineUnavailableException;

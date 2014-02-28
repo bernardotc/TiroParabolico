@@ -27,34 +27,30 @@ import java.io.IOException;
 import java.util.Vector;
 
 /**
- *
+ * @author mrquorr
  * @author bernardot
+ * @version 1.5 28/02/2014
  */
 public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
     private static final long serialVersionUID = 1L;
     private Caparazon caparazon; //objeto del caparazon
     private Tortuga tortuga; //objeto de la tortuga
-
-    private int score;
-    private int vidas;
-    private int contadorVidas;
-
-    private float factorGravedad;
-    private float factorAumento;
-
+    private int score; // la puntacion del juego
+    private int vidas;  // vidas
+    private int contadorVidas;  // numero de veces antes de perder vida
+    private float factorGravedad; // aumentara la gravedad
+    private float factorAumento;    // ayudara a aumentar la velocidad en x
+    private float factorAumentoY;   // ayudara a aumentar la velocidad en y
     private Image dbImage;    // Imagen a proyectar
-    private Image background;
+    private Image background;   // imagen que sera background
     private Graphics dbg;   // Objeto grafico
-    private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
-    private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
-    private boolean cargar;
-    private boolean guardar;
     private String instr1; // String que contiene las instrucciones del juego.
     private String instr2; // String que contiene las instrucciones del juego.
-    private String instr3;
-    private SoundClip shell;
-    private SoundClip catched;
+    private String instr3;  // String que contiene las instrucciones del juego.
+    private String instr4;  // String que contiene las instrucciones del juego
+    private SoundClip shell;    // Objeto Soundclip triste
+    private SoundClip catched;  // Objeto SoundClip alegre
     private String nombreArchivo;   // Nombre del archivo
     private String[] arr;   // Arreglo del archivo dividido
 
@@ -64,25 +60,55 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     private boolean volando;
     //de movimiento de la tortuga
     private boolean derecha;
+    //generales
     private boolean izquierda;
-
-    private boolean gameOver;
-
-    private String instr; // String que contiene las instrucciones del juego.
-    private Vector vec;     // Objeto vector
-
+    private boolean gameOver;   // saber si se acabaron las vidas
+    private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
+    private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
+    private boolean cargar; // Valor booleano para cargar el juego
+    private boolean guardar;    // Valor booleano para guardar el juego
+    private boolean sonido; // Valor booleano para controlar el sonido
     private boolean colision;
 
+    // Imagenes adicionales para ambientizar el juego
+    private Image im1;
+    private Image im2;
+    private Image block;
+    private Image plant;
+
+    // Variables auxilares para leer archivo y actualizar
+    private int cPosX;  // caparazon PosX
+    private int cPosY;  // caparazon PosY
+    private float cVelX;    // caparazon VelX
+    private float cVelY;    // caparazon VelY
+    private boolean c;  // click
+    private boolean v;  // volando
+    private int tPosX;  // tortuga PosX
+    private int tPosY; // tortuga PosY
+    private float tVelX;    // tortugaVelX
+    private int scr;    // score
+    private int vid; // vidas
+    private int contVid;    // contadordeVidas
+    private float fG;   // factorGravedad
+    private float fA;   // factorAumento
+    private float fAY;  // factorAumentoY
+    private boolean son;    // Sonido
+
+    /**
+     *  Metodo constructor del JFrame donde se inicializan las variables y se empieza el thread de
+     *  <code>JFrame</code>.
+     */
     public JFrameTiroParabolico() {
         //Se inicializan variables
-
+        sonido = true;
         pausado = false;
-        instrucciones = false;
-        // TODO Corregir
-        instr1 = "El juego consiste en intentar atrapar la pelota con la canasta. Al momento de darle clic a la pelota, esta se "; // Instrucciones del juego
-        instr2 = "moverá a través de la pantalla. Con las teclas izquierda y derecha, podrás mover la canasta. Si no llegas ";
-        instr3 = "atrapar la pelota, la pelota caerá más rápido... ¡CUIDADO! ¡TU PUEDES!";
-        // END TODO Corregir
+        instrucciones = true;
+        // Se cargan las instrucciones
+        instr1 = "El juego consiste en intentar atrapar el caparazón con la tortuga. Al momento de darle clic al caparazón, este se "; // Instrucciones del juego
+        instr2 = "moverá a través de la pantalla. Con las teclas izquierda y derecha, podrás mover a la tortuga. Si no llegas ";
+        instr3 = "atrapar el caparazón, el caparazón caerá más rápido... ¡CUIDADO! ¡TU PUEDES!";
+        instr4 = "Teclas: P = pausa. I = instrucciones. S = sonido. C = Cargar. G = guardar";
+
         // Se cargan los sonidos
         shell = new SoundClip("sounds/stomp.wav");
         catched = new SoundClip("sounds/marioSound.wav");
@@ -91,24 +117,35 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         cargar = false;
         guardar = false;
 
+        // Se inicializan valores del juego
         score = 0;
         vidas = 5;
         contadorVidas = 3;
         gameOver = false;
-
         factorGravedad = (float) .5;
         factorAumento = 1;
-
+        factorAumentoY = 1;
+        // Ningun objeto se mueve
         derecha = false;
         izquierda = false;
         click = false;
         volando = false;
 
-        URL bURL = this.getClass().getResource("/images/images.gif");
+        // Se inicializan las imagenes ambientales
+        URL bURL = this.getClass().getResource("images/back.png");
         background = Toolkit.getDefaultToolkit().getImage(bURL);
+        URL cURL = this.getClass().getResource("images/redShell4.png");
+        URL dURL = this.getClass().getResource("images/koopa2_2.png");
+        URL eURL = this.getClass().getResource("images/block.png");
+        URL fURL = this.getClass().getResource("images/plant.png");
+        im1 = Toolkit.getDefaultToolkit().getImage(cURL);
+        im2 = Toolkit.getDefaultToolkit().getImage(dURL);
+        block = Toolkit.getDefaultToolkit().getImage(eURL);
+        plant = Toolkit.getDefaultToolkit().getImage(fURL);
 
+        //Tamaño del JFrame
         setSize(800, 500);
-
+        //Se crean objetos
         tortuga = new Tortuga(getWidth() / 2, (getHeight() - 120));
         caparazon = new Caparazon(5, getHeight() / 2);
 
@@ -116,19 +153,16 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         addMouseMotionListener(this);
         addKeyListener(this);
 
-        // TODO
-        instr = "El juego consiste en intentar atrapar al caparazon con la tortuga. Al momento de darle clic al caparazon, este se moverá a través de la pantalla. Con las teclas izquierda y derecha, podrás mover la tortuga. Si no llegas atrapar el caparazon, el caparazon caerá más rápido... ¡CUIDADO! ¡TU PUEDES!"; // Instrucciones del jugo
-        // END TODO Corregir
-        // Se cargan los sonidos
-        shell = new SoundClip("sounds/stomp.wav");
-        catched = new SoundClip("sounds/marioSound.wav");
-
         // Declaras un hilo
         Thread th = new Thread(this);
         // Empieza el hilo
         th.start();
     }
 
+    /**
+     *  Metodo onde empieza el hilo del 
+     *  <code>JFrame</code>.
+     */
     public void run() {
 
         while (true) {
@@ -137,7 +171,7 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
                 checaColision();
             }
 
-            // Se actualiza el <code>Applet</code> repintando el contenido.
+            // Se actualiza el <code>JFrame</code> repintando el contenido.
             repaint();
 
             try {
@@ -150,29 +184,34 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     }
 
     /**
-     * Metodo usado para actualizar la posicion de objetos heroe y ariados.
+     * Metodo usado para actualizar la posicion de objetos tortuga y caparazon.
      *
      */
     public void actualiza() {
-        //Determina el tiempo que ha transcurrido desde que el Applet inicio su ejecución
+        //Si el juego no ha terminado hacer
         if (!gameOver) {
+            // Si la bandera de pausa esta apagada
             if (!pausado) {
+                // Si el caparazon se le acaba de dar click y va volando
                 if (click && volando) {
-                    int opcion = (int) ((Math.random() * 8)) + 1; //da la opcion sobre la distancia final en x
+                    int opcion = (int) ((Math.random() * 5)) + 6; //da la opcion sobre la distancia final en x
                     caparazon.setVelX(opcion * factorAumento);
-                    caparazon.setVelY(-15);
+                    caparazon.setVelY(-16 * factorAumentoY);
                     click = false;
                 }
+                // Si el contador de oportunidades antes de perder vida es 0
                 if (contadorVidas < 1) {
                     vidas--;
                     factorGravedad += 0.5;
-                    factorAumento += 0.8;
+                    factorAumento += 0.3;
+                    factorAumentoY += 0.3;
                     contadorVidas = 3;
                 }
-
+                // Si se acaban las vidas
                 if (vidas == 0) {
                     gameOver = true;
                 }
+                // Mientras el objeto va volando
                 if (volando) {
                     caparazon.gravedad(factorGravedad);
                     int x = (int) Math.round(caparazon.getVelX());
@@ -180,59 +219,69 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
                     caparazon.setPosX(caparazon.getPosX() + x);
                     caparazon.setPosY(caparazon.getPosY() + y);
                 }
-
-                if (caparazon.getPosY() > getHeight()) {
-                    shell.play();
-                    contadorVidas--;
-                    volando = false;
-                    caparazon.setPosY(getHeight() / 2);
-                    caparazon.setPosX(0);
-                    caparazon.setVelX(0);
-                    caparazon.setVelY(0);
-                }
+                // Si se esta presionando la tecla izquierda
                 if (izquierda) {
                     tortuga.setVelX(tortuga.getVelX() - 2);
                 }
+                // Si se esta presionando la tecla derecha
                 if (derecha) {
                     tortuga.setVelX(tortuga.getVelX() + 2);
                 }
-
+                // Actualizar la posicion de la tortuga
                 int x = (int) Math.round(tortuga.getVelX());
                 tortuga.setPosX(x + tortuga.getPosX());
                 tortuga.gravedad();
-
-                if (tortuga.getPosX() < 0) {
-                    tortuga.setVelX(tortuga.getVelX() * -1);
-                }
-                if (tortuga.getPosX() > getWidth() - tortuga.getAncho()) {
-                    tortuga.setVelX(tortuga.getVelX() * -1);
-                }
-
+                // Si se prendio la bandera de colision, reacomodar el caparazon
                 if (colision) {
-                    catched.play();
+                    if (sonido) {
+                        catched.play();
+                    }
                     caparazon.setPosX(0);
                     caparazon.setPosY(getHeight() / 2);
                     caparazon.setVelX(0);
                     caparazon.setVelY(0);
                     volando = false;
                     colision = false;
+                    // Aumentar en dos el score
                     score += 2;
                 }
-                if (cargar) {
+                // Si se quiere cargar el juego (Asegurarse de que no este en instrucciones)
+                if (cargar && !instrucciones) {
                     try {
                         leeArchivo();
+                        // asignar valores usando los auxiliares
+                        caparazon.setPosX(cPosX);
+                        caparazon.setPosY(cPosY);
+                        caparazon.setVelX(cVelX);
+                        caparazon.setVelY(cVelY);
+                        click = c;
+                        volando = v;
+                        tortuga.setPosX(tPosX);
+                        tortuga.setPosY(tPosY);
+                        tortuga.setVelX(tVelX);
+                        score = scr;
+                        vidas = vid;
+                        contadorVidas = contVid;
+                        factorGravedad = fG;
+                        factorAumento = fA;
+                        factorAumentoY = fAY;
+                        sonido = son;
                     } catch (IOException e) {
                         System.out.println("Error en " + e.toString());
                     }
                     cargar = false;
+                } else {
+                    cargar = false;
                 }
-
-                if (guardar) {
+                // Si se quiere guardar el juego (Asegurarse de que no este en instrucciones)
+                if (guardar && !instrucciones) {
                     try {
                         grabaArchivo();
                     } catch (IOException e) {
                         System.out.println("Error en " + e.toString());
                     }
+                    guardar = false;
+                } else {
                     guardar = false;
                 }
 
@@ -243,16 +292,39 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
 
     /**
      * Metodo usado para checar las colisiones del objeto tortuga y caparazon
-     * con entre si <code>Applet</code>.
+     * con entre si <code>JFrame</code>.
      */
     public void checaColision() {
+        // Si la tortuga esta colisionando con el caparazon
         if (tortuga.intersecta(caparazon)) {
             colision = true;
+        }
+        // Si el caparazon llega al suelo
+        if (caparazon.getPosY() > getHeight()) {
+            if (sonido) {
+                shell.play();
+            }
+            contadorVidas--;
+            volando = false;
+            caparazon.setPosY(getHeight() / 2);
+            caparazon.setPosX(0);
+            caparazon.setVelX(0);
+            caparazon.setVelY(0);
+        }
+        // Limitar a que la tortuga no pase de la mitad derecha a la izquierda
+        if (tortuga.getPosX() < getWidth() / 2) {
+            tortuga.setVelX(tortuga.getVelX() * -1);
+            tortuga.setPosX(getWidth() / 2);
+        }
+        // Limitar a que la tortuga no se salga del frame
+        if (tortuga.getPosX() > getWidth() - tortuga.getAncho()) {
+            tortuga.setVelX(tortuga.getVelX() * -1);
+            tortuga.setPosX(getWidth() - tortuga.getAncho());
         }
     }
 
     /**
-     * Metodo <I>update</I> sobrescrito de la clase <code>Applet</code>,
+     * Metodo <I>update</I> sobrescrito de la clase <code>JFrame</code>,
      * heredado de la clase Container.<P>
      * En este metodo lo que hace es actualizar el contenedor
      *
@@ -320,7 +392,8 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> generado al presionar el ariados.
      */
     public void mousePressed(MouseEvent e) {
-        if (caparazon.intersecta(e.getX(), e.getY()) && !click && !volando) {
+        // Si se presiona el caparazon y el objeto no ha sido picado antes, no esta volando ni pausado
+        if (caparazon.intersecta(e.getX(), e.getY()) && !click && !volando && !pausado) {
             click = true;
             volando = true;
         }
@@ -371,35 +444,42 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> generado al presionar las teclas.
      */
     public void keyPressed(KeyEvent e) {
+        // Si se presiona P
         if (e.getKeyCode() == KeyEvent.VK_P) {
             if (pausado) {
                 pausado = false;
             } else {
                 pausado = true;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_I) {
+        } else if (e.getKeyCode() == KeyEvent.VK_I) { // Si se presiona I
             if (instrucciones) {
                 instrucciones = false;
             } else {
                 instrucciones = true;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_A) {
-            if (!click) {
+        } else if (e.getKeyCode() == KeyEvent.VK_A) {   // Si se presiona A (Debugging para comprobar click en el aire)
+            if (!volando) {
                 click = true;
             } else {
                 click = false;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        } else if (e.getKeyCode() == KeyEvent.VK_S) {   // Si se presiona S
+            if (!sonido) {
+                sonido = true;
+            } else {
+                sonido = false;
+            }
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {   // Si se presiona la flecha derecha
             if (!derecha) {
                 derecha = true;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {    // Si se presiona la flecha izquierda
             if (!izquierda) {
                 izquierda = true;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_C) {
+        } else if (e.getKeyCode() == KeyEvent.VK_C && !pausado) {   // Si se presiona C
             cargar = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_G) {
+        } else if (e.getKeyCode() == KeyEvent.VK_G && !pausado) {   // Si se presiona G
             guardar = true;
         }
     }
@@ -426,11 +506,11 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      * @param e es el <code>evento</code> que se genera en al soltar las teclas.
      */
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {   // Cuando se deja de presionar la flecha izquierda
             if (izquierda) {
                 izquierda = false;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {   // Cuando se deja de presionar la flecha derecha
             if (derecha) {
                 derecha = false;
             }
@@ -447,19 +527,35 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         try {
             fileIn = new BufferedReader(new FileReader(nombreArchivo));
         } catch (FileNotFoundException e) {
+            // Crear un archivo demo
             File puntos = new File(nombreArchivo);
             PrintWriter fileOut = new PrintWriter(puntos);
-            fileOut.println("100,demo");
+            // Valores default
+            fileOut.println("5,250,0,0,false,false,250,380,0,0,5,3,.5,1,1,true");
             fileOut.close();
             fileIn = new BufferedReader(new FileReader(nombreArchivo));
         }
         String dato = fileIn.readLine();
 
         while (dato != null) {
+            // Leer el string, dividirlo y asignar a los auxiliares
             arr = dato.split(",");
-            int num = (Integer.parseInt(arr[0]));
-            String nom = arr[1];
-            //vec.add(new Puntaje(nom, num));
+            cPosX = (Integer.parseInt(arr[0]));
+            cPosY = (Integer.parseInt(arr[1]));
+            cVelX = (Float.parseFloat(arr[2]));
+            cVelY = (Float.parseFloat(arr[3]));
+            c = (Boolean.parseBoolean(arr[4]));
+            v = (Boolean.parseBoolean(arr[5]));
+            tPosX = (Integer.parseInt(arr[6]));
+            tPosY = (Integer.parseInt(arr[7]));
+            tVelX = (Float.parseFloat(arr[8]));
+            scr = (Integer.parseInt(arr[9]));
+            vid = (Integer.parseInt(arr[10]));
+            contVid = (Integer.parseInt(arr[11]));
+            fG = (Float.parseFloat(arr[12]));
+            fA = (Float.parseFloat(arr[13]));
+            fAY = (Float.parseFloat(arr[14]));
+            son = (Boolean.parseBoolean(arr[15]));
             dato = fileIn.readLine();
         }
         fileIn.close();
@@ -472,36 +568,76 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
      */
     public void grabaArchivo() throws IOException {
         PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
-        for (int i = 0; i < vec.size(); i++) {
-            //Puntaje x;
-            //x = (Puntaje) vec.get(i);
-            //fileOut.println(x.toString());
-        }
+        // Guardar los valores necesarios para volver a cargar el juego en donde se quedo
+        fileOut.println("" + caparazon.getPosX() + "," + caparazon.getPosY() + ","
+                + caparazon.getVelX() + "," + caparazon.getVelY() + "," + click
+                + "," + volando + "," + tortuga.getPosX() + "," + tortuga.getPosY()
+                + "," + tortuga.getVelX() + "," + score + "," + vidas + ","
+                + contadorVidas + "," + factorGravedad + "," + factorAumento + ","
+                + factorAumentoY + "," + sonido);
         fileOut.close();
     }
 
+    /**
+     * Metodo paint que pinta todo en el <code>JFrame<code>.
+     * @param g
+     */
     public void paint1(Graphics g) {
         g.setColor(Color.black);
         if (!gameOver) {
             if (caparazon != null && tortuga != null) {
-                //g.drawImage(background, 0, 0, this);
-                g.drawString("Puntuacion: " + score, 5, 50);
-                g.drawString("Vidas: " + vidas, 5, 70);
-                g.drawImage(caparazon.getImagenI(), caparazon.getPosX(), caparazon.getPosY(), this);
-                g.drawImage(tortuga.getImagenI(), tortuga.getPosX(), tortuga.getPosY(), this);
+                // Mostrar background
+                g.drawImage(background, 0, 0, this);
+                // Mostrar puntuacion, vida y sonido
+                g.drawString("Puntuacion: " + score, 5, 40);
+                g.drawString("Vidas: " + vidas, 5, 60);
+                String aux;
+                if (sonido) {
+                    aux = "Si";
+                } else {
+                    aux = "No";
+                }
+                g.drawString("Sonido: " + aux, 5, 80);
+                // Si esta pausado, mostrarlo
+                if (pausado) {
+                    g.drawString("Pausado", getWidth() / 2, getHeight() / 2);
+                }
+                // Dibujar objetos inanimados
+                g.drawImage(block, 7, 300, this);
+                g.drawImage(plant, getWidth() / 2 - 60, getHeight() - 140, this);
+                // Checar si el objeto esta en movimiento
+                if (volando) {
+                    g.drawImage(caparazon.getImagenI(), caparazon.getPosX(), caparazon.getPosY(), this);
+                } else {
+                    g.drawImage(im1, caparazon.getPosX(), caparazon.getPosY(), this);
+                }
+                // Checar si la tortuga esta en movimiento
+                if (tortuga.getVelX() != 0) {
+                    g.drawImage(tortuga.getImagenI(), tortuga.getPosX(), tortuga.getPosY(), this);
+
+                } else {
+                    g.drawImage(im2, tortuga.getPosX(), tortuga.getPosY(), this);
+                }
+                // Desplegar instrucciones
                 if (instrucciones) {
-                    g.setColor(Color.BLACK);
-                    g.drawString(instr1, 20, 80);
-                    g.drawString(instr2, 20, 100);
-                    g.drawString(instr3, 20, 120);
+                    g.setColor(Color.orange);
+                    g.drawString(instr1, 20, 120);
+                    g.drawString(instr2, 20, 140);
+                    g.drawString(instr3, 20, 160);
+                    g.drawString(instr4, 20, 180);
                 }
             } else {
                 //Da un mensaje mientras se carga el dibujo	
                 g.drawString("No se cargo la imagen..", 20, 20);
             }
-        }
-        else {
-            g.drawString("GAMEOVER", getWidth()/2, getHeight()/2);
+        } else {
+            // Desplegar game over y credits
+            g.drawImage(background, 0, 0, this);
+            g.drawString("GAMEOVER", getWidth() / 2, getHeight() / 2);
+            g.drawString("Hecho por:", 20, 120);
+            g.drawString("Sergio Cordero", 20, 140);
+            g.drawString("Bernardo Treviño", 20, 160);
+            g.drawString("Tarea hecha para el profesor Mejorado. ¡Diviértase!", 20, 180);
         }
 
     }
