@@ -22,12 +22,14 @@ public class Caparazon extends Base{
     **/
 	public Caparazon(int posX,int posY){
             super(posX,posY);
-            Image imagen = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/ball.png"));
+            this.velX = 0;
+            this.velY = 0;
+            Image imagen = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/redShell.gif"));
             ImageIcon image = new ImageIcon(imagen);
             this.setImageIcon(image);
         }
         
-        public void gravedad(){
-            this.velY += 1;
+        public void gravedad(float num){
+            this.velY += num;
         }
 }

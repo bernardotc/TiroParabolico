@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -33,8 +34,16 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
 
     private Caparazon caparazon; //objeto del caparazon
     private Tortuga tortuga; //objeto de la tortuga
+    
+    private int score;
+    private int vidas;
+    private int contadorVidas;
+    
+    private float factorGravedad;
+    private float factorAumento;
 
     private Image dbImage;    // Imagen a proyectar
+    private Image background;
     private Graphics dbg;   // Objeto grafico
     private boolean pausado;    // Valor booleano para saber si el JFrame esta en pausa
     private boolean instrucciones;  // Valor booleano para mostrar/quitar instrucciones
@@ -46,6 +55,8 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         //de movimiento de la tortuga
     private boolean derecha;
     private boolean izquierda;
+    
+    private boolean gameOver;
 
     private boolean cargar;
     private boolean guardar;
@@ -63,15 +74,25 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         pausado = false;
         instrucciones = false;
         
+        score = 0;
+        vidas = 5;
+        contadorVidas = 3;
+        gameOver = false;
+        
+        factorGravedad = (float) .5;
+        factorAumento = 1;
+        
         derecha = false;
         izquierda = false;
         click = false;
         volando = false;
+        
+        URL bURL = this.getClass().getResource("/images/images.gif");
+        background = Toolkit.getDefaultToolkit().getImage(bURL);
 
-        setBackground(Color.white);
         setSize(800, 500);
 
-        tortuga = new Tortuga(getWidth()/2, (getHeight() - 50));
+        tortuga = new Tortuga(getWidth()/2, (getHeight() - 120));
         caparazon = new Caparazon(5, getHeight() / 2);
         
         addMouseListener(this);
@@ -86,7 +107,7 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         // END TODO Corregir
         // Se cargan los sonidos
         shell = new SoundClip("sounds/stomp.wav");
-        catched = new SoundClip("siunds/marioSound.wav");
+        catched = new SoundClip("sounds/marioSound.wav");
         
         
         // Declaras un hilo
@@ -123,17 +144,34 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
         //Determina el tiempo que ha transcurrido desde que el Applet inicio su ejecución
         if (!pausado) {
             if (click && volando) {
-                int opcion = (int) ((Math.random() * 15)) + 1; //da la opcion sobre la distancia final en x
-                caparazon.setVelX(opcion);
-                caparazon.setVelY(-20);
+                int opcion = (int) ((Math.random() * 8)) + 1; //da la opcion sobre la distancia final en x
+                caparazon.setVelX(opcion * factorAumento);
+                caparazon.setVelY(-15);
                 click = false;
             }
+            if (contadorVidas < 1){
+                vidas--;
+                factorGravedad += 0.5;
+                factorAumento += 0.8;
+                contadorVidas = 3;
+            }
+            
+            if (vidas == 0){
+                gameOver = true;
+            }
+            if (gameOver){
+                
+            }
             if (volando) {
-                caparazon.gravedad();
-                caparazon.setPosX(caparazon.getPosX() + caparazon.getVelX());
-                caparazon.setPosY(caparazon.getPosY() + caparazon.getVelY());
+                caparazon.gravedad(factorGravedad);
+                int x = (int)Math.round(caparazon.getVelX());
+                int y = (int)Math.round(caparazon.getVelY());
+                caparazon.setPosX(caparazon.getPosX() + x);
+                caparazon.setPosY(caparazon.getPosY() + y);
             }
             if (caparazon.getPosY() > getHeight()){
+                shell.play();
+                contadorVidas--;
                 volando = false;
                 caparazon.setPosY(getHeight()/2);
                 caparazon.setPosX(0);
@@ -147,7 +185,8 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
                 tortuga.setVelX(tortuga.getVelX() + 2);
             }
             
-            tortuga.setPosX(tortuga.getPosX() + tortuga.getVelX());
+            int x = (int)Math.round(tortuga.getVelX());
+            tortuga.setPosX(x + tortuga.getPosX());
             tortuga.gravedad();
             
             if (tortuga.getPosX() < 0){
@@ -158,12 +197,14 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
             }
             
             if (colision){
+                catched.play();
                 caparazon.setPosX(0);
                 caparazon.setPosY(getHeight()/2);
                 caparazon.setVelX(0);
                 caparazon.setVelY(0);
                 volando = false;
                 colision = false;
+                score += 2;
             }
             
             
@@ -411,9 +452,13 @@ public class JFrameTiroParabolico extends JFrame implements Runnable, KeyListene
     }
 
     public void paint1(Graphics g) {
+        g.setColor(Color.black);
         if (caparazon != null && tortuga != null) {
-            g.drawString("velocidad Y:" + caparazon.getVelY(), getWidth()/2, 5);
-            g.drawString("velocidad X:" + caparazon.getVelX(), getWidth()/2, 15);
+            //g.drawImage(background, 0, 0, this);
+            g.drawString("Puntuacion: " + score, 5, 50);
+            g.drawString("Vidas: " + vidas, 5, 70);
+            g.drawString("velocidad caparazon en y: " + caparazon.getVelY(), 5, 100);
+            g.drawString("velocidad caparazon en x: " + factorGravedad, 5, 120);
             g.drawImage(caparazon.getImagenI(), caparazon.getPosX(), caparazon.getPosY(), this);
             g.drawImage(tortuga.getImagenI(), tortuga.getPosX(), tortuga.getPosY(), this);
             if (instrucciones) {

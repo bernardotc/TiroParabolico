@@ -22,7 +22,9 @@ public class Tortuga extends Base{
     **/
 	public Tortuga(int posX,int posY){
             super(posX,posY);
-            Image imagen = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/proto.png"));
+            this.velX = 0;
+            this.velY = 0;
+            Image imagen = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/koopa.gif"));
             ImageIcon image = new ImageIcon(imagen);
             this.setImageIcon(image);
         }

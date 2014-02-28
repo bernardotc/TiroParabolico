@@ -13,8 +13,8 @@ import java.awt.Rectangle;
 public class Base {
 	
         //velocidades
-        protected int velX;
-        protected int velY;
+        protected float velX;
+        protected float velY;
     
 	private int posX;    //posicion en x.       
 	private int posY;	//posicion en y.
@@ -69,7 +69,7 @@ public class Base {
 	 * Metodo modificador usado para cambiar la velocidad en x del objeto 
 	 * @param velX es la <code>velocidad en x</code> del objeto.
 	 */
-	public void setVelX(int velX) {
+	public void setVelX(float velX) {
 		this.velX = velX;
 	}
 	
@@ -77,7 +77,7 @@ public class Base {
 	 * Metodo de acceso que regresa la velocidad en x del objeto 
 	 * @return velX es la <code>velocidad en x</code> del objeto.
 	 */
-	public int getVelX() {
+	public float getVelX() {
 		return velX;
 	}
 	
@@ -85,7 +85,7 @@ public class Base {
 	 * Metodo modificador usado para cambiar la velocidad en y del objeto 
 	 * @param velY es la <code>velocidad en y</code> del objeto.
 	 */
-	public void setVelY(int velY) {
+	public void setVelY(float velY) {
 		this.velY = velY;
 	}
 	
@@ -93,7 +93,7 @@ public class Base {
 	 * Metodo de acceso que regresa la velocidad en y del objeto 
 	 * @return posY es la <code>velocidad en y</code> del objeto.
 	 */
-	public int getVelY() {
+	public float getVelY() {
 		return velY;
 	}
 	
