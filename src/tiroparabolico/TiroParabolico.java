@@ -8,8 +8,8 @@ package tiroparabolico;
 /**
  * @author mrquorr
  * @author bernardot
- * Bernardo Treviño
- * Sergio Cordero
+ * Bernardo Treviño  A00813175
+ * Sergio Cordero  A01191167
  * @version 1.00 25/02/2014
  */
 public class TiroParabolico {
